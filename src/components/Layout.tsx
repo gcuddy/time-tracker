@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import * as React from "react";
+import { createLink, type LinkComponent } from "@tanstack/react-router";
 
 function Root({ children }: { children: React.ReactNode }) {
   return (
@@ -65,50 +66,71 @@ function SidebarDivider() {
   );
 }
 
-interface SidebarItemProps {
-  children: React.ReactNode;
-  href?: string;
-  active?: boolean;
+// Base anchor component for createLink
+interface SidebarLinkBaseProps
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   icon?: React.ReactNode;
+  active?: boolean;
+}
+
+const SidebarLinkBase = React.forwardRef<HTMLAnchorElement, SidebarLinkBaseProps>(
+  ({ children, icon, active = false, className, ...props }, ref) => {
+    const baseClasses =
+      "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors";
+    const activeClasses = active
+      ? "bg-zinc-950/5 dark:bg-white/5 text-zinc-950 dark:text-white"
+      : "text-zinc-600 hover:bg-zinc-950/5 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white";
+
+    return (
+      <span className="relative">
+        <a
+          ref={ref}
+          className={`${baseClasses} ${activeClasses} ${className ?? ""}`}
+          {...props}
+        >
+          {icon && (
+            <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
+              {icon}
+            </span>
+          )}
+          <span className="truncate">{children}</span>
+          {active && (
+            <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
+          )}
+        </a>
+      </span>
+    );
+  }
+);
+SidebarLinkBase.displayName = "SidebarLinkBase";
+
+// Create router-aware link using createLink
+const CreatedSidebarLink = createLink(SidebarLinkBase);
+
+// Export the final SidebarItem component with preload behavior
+const SidebarItem: LinkComponent<typeof SidebarLinkBase> = (props) => {
+  return <CreatedSidebarLink preload="intent" {...props} />;
+};
+
+// Button variant for non-link sidebar items
+interface SidebarButtonProps {
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+  active?: boolean;
   onClick?: () => void;
 }
 
-function SidebarItem({
+function SidebarButton({
   children,
-  href,
-  active = false,
   icon,
+  active = false,
   onClick,
-}: SidebarItemProps) {
+}: SidebarButtonProps) {
   const baseClasses =
     "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors";
   const activeClasses = active
     ? "bg-zinc-950/5 dark:bg-white/5 text-zinc-950 dark:text-white"
     : "text-zinc-600 hover:bg-zinc-950/5 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white";
-
-  const content = (
-    <>
-      {icon && (
-        <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
-          {icon}
-        </span>
-      )}
-      <span className="truncate">{children}</span>
-      {active && (
-        <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
-      )}
-    </>
-  );
-
-  if (href) {
-    return (
-      <span className="relative">
-        <Link to={href} className={`${baseClasses} ${activeClasses}`}>
-          {content}
-        </Link>
-      </span>
-    );
-  }
 
   return (
     <span className="relative">
@@ -117,7 +139,15 @@ function SidebarItem({
         onClick={onClick}
         className={`${baseClasses} ${activeClasses}`}
       >
-        {content}
+        {icon && (
+          <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
+            {icon}
+          </span>
+        )}
+        <span className="truncate">{children}</span>
+        {active && (
+          <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
+        )}
       </button>
     </span>
   );
@@ -213,6 +243,7 @@ const Sidebar = Object.assign(SidebarRoot, {
   Section: SidebarSection,
   Label: SidebarLabel,
   Item: SidebarItem,
+  Button: SidebarButton,
   Spacer: SidebarSpacer,
   Divider: SidebarDivider,
   HeaderButton: SidebarHeaderButton,
