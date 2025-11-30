@@ -25,11 +25,27 @@ export const visibleCategories$ = queryDb(
   { label: "visibleTodos" },
 );
 
+export const allTimers$ = queryDb(
+  (get) => {
+    return tables.events.orderBy("startedAt", "desc");
+  },
+  { label: "runningTimers" },
+);
+
 export const runningTimers$ = queryDb(
   (get) => {
     return tables.events.where("endedAt", "=", null);
   },
-  { label: "visibleTodos" },
+  { label: "runningTimers" },
+);
+
+export const completedTimers$ = queryDb(
+  (get) => {
+    return tables.events
+      .where("endedAt", "!=", null)
+      .orderBy("endedAt", "desc");
+  },
+  { label: "completedTimers" },
 );
 
 export const MainSection: React.FC = () => {

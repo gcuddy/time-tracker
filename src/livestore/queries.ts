@@ -1,13 +1,13 @@
-import { queryDb, Schema, sql } from '@livestore/livestore'
+import { queryDb, Schema, sql } from "@livestore/livestore";
 
-import { tables } from './schema.ts'
+import { tables } from "./schema.ts";
 
-export const uiState$ = queryDb(tables.uiState.get(), { label: 'uiState' })
+export const uiState$ = queryDb(tables.uiState.get(), { label: "uiState" });
 
 export const categories$ = queryDb(
   tables.categories.where({ deletedAt: null }),
-  { label: 'categories' }
-)
+  { label: "categories" },
+);
 
 /**
  * Events joined with their category data (name, color).
@@ -22,7 +22,6 @@ export const eventsWithCategories$ = queryDb(
         categories.color as categoryColor
       FROM events
       LEFT JOIN categories ON events.categoryId = categories.id
-      WHERE events.deletedAt IS NULL
       ORDER BY events.startedAt DESC
     `,
     schema: tables.events.rowSchema.pipe(
@@ -30,10 +29,10 @@ export const eventsWithCategories$ = queryDb(
         Schema.Struct({
           categoryName: Schema.NullOr(Schema.String),
           categoryColor: Schema.NullOr(Schema.String),
-        })
+        }),
       ),
-      Schema.Array
+      Schema.Array,
     ),
   },
-  { label: 'eventsWithCategories' }
-)
+  { label: "eventsWithCategories" },
+);

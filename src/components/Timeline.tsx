@@ -3,7 +3,11 @@ import type React from "react";
 
 import { uiState$ } from "../livestore/queries.ts";
 import { events } from "../livestore/schema.ts";
-import { runningTimers$, visibleCategories$ } from "./MainSection.tsx";
+import {
+  allTimers$,
+  runningTimers$,
+  visibleCategories$,
+} from "./MainSection.tsx";
 import { useState, useEffect } from "react";
 import { Duration } from "effect";
 
@@ -36,7 +40,7 @@ export const Timeline: React.FC = () => {
     );
 
   const visibleCategories = store.useQuery(visibleCategories$);
-  const runningTimers = store.useQuery(runningTimers$);
+  const allTimers = store.useQuery(allTimers$);
   const [selected, setSelected] = useState<string>();
   const [now, setNow] = useState(() => Date.now());
 
@@ -85,12 +89,12 @@ export const Timeline: React.FC = () => {
         </button>
       </div>
 
-      {runningTimers.length > 0 && (
+      {allTimers.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
-            Running Timers
+            Timers
           </h3>
-          {runningTimers.map((timer) => (
+          {allTimers.map((timer) => (
             <div
               key={timer.id}
               className="p-4 bg-green-50 border border-green-200 rounded-lg"
@@ -101,14 +105,27 @@ export const Timeline: React.FC = () => {
                   {visibleCategories.find((c) => c.id === timer.categoryId)
                     ?.name ?? timer.categoryId}
                 </span>
-                <span className="text-2xl font-mono font-bold text-green-700">
-                  {formatDuration(timer.startedAt, now)}
-                </span>
+                {timer.endedAt ? (
+                  <span className="text-2xl font-mono font-bold text-green-700">
+                    {formatDuration(timer.startedAt, timer.endedAt.getTime())}
+                  </span>
+                ) : (
+                  <span className="text-2xl font-mono font-bold text-green-700">
+                    {formatDuration(timer.startedAt, now)}
+                  </span>
+                )}
               </div>
               <p className="text-sm text-neutral-500 mt-1">
                 Started: {timer.startedAt.toLocaleTimeString()}
               </p>
-              <button onClick={() => timerStopped(timer.id)}>Stop</button>
+              {timer.endedAt !== null && (
+                <p className="text-sm text-neutral-500 mt-1">
+                  Ended: {timer.endedAt.toLocaleTimeString()}
+                </p>
+              )}
+              {timer.endedAt === null && (
+                <button onClick={() => timerStopped(timer.id)}>Stop</button>
+              )}
             </div>
           ))}
         </div>
