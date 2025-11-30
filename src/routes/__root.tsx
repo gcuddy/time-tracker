@@ -10,6 +10,7 @@ import { VersionBadge } from "../components/VersionBadge.tsx";
 import { SyncPayload, schema } from "../livestore/schema.ts";
 import LiveStoreWorker from "../livestore.worker.ts?worker";
 import { getStoreId } from "../util/store-id.ts";
+import { Layout } from "../components/Layout.tsx";
 
 const storeId = getStoreId();
 
@@ -37,7 +38,17 @@ function RootComponent() {
       <div className="fixed top-0 right-0 bg-neutral-800">
         <FPSMeter height={40} />
       </div>
-      <Outlet />
+      <Layout>
+        <Layout.Sidebar>
+          <Layout.Sidebar.Section>
+            <Layout.Sidebar.Item>Hey</Layout.Sidebar.Item>
+          </Layout.Sidebar.Section>
+        </Layout.Sidebar>
+
+        <Layout.Main>
+          <Outlet />
+        </Layout.Main>
+      </Layout>
       <VersionBadge />
       <TanStackRouterDevtools />
     </LiveStoreProvider>
