@@ -11,7 +11,11 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "verbatimModuleSyntax": true,
-    "types": ["vite/client", "@cloudflare/workers-types", "wicg-file-system-access"],
+    "types": [
+      "vite/client",
+      "@cloudflare/workers-types",
+      "wicg-file-system-access"
+    ],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -24,6 +28,11 @@
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     /* Effect Language Service */
     "plugins": [
