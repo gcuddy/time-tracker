@@ -33,6 +33,7 @@ export const tables = {
         nullable: true,
         schema: Schema.DateFromNumber,
       }),
+      color: State.SQLite.text({ nullable: false }),
     },
   }),
   events: State.SQLite.table({
@@ -94,6 +95,14 @@ export const events = {
       id: Schema.String,
     }),
   }),
+  categoryCreated: Events.synced({
+    name: "v1.CategoryCreated",
+    schema: Schema.Struct({
+      name: Schema.String,
+      color: Schema.String,
+      id: Schema.String,
+    }),
+  }),
   eventEnded: Events.synced({
     name: "v1.EventEnded",
     schema: Schema.Struct({ endedAt: Schema.Date, eventId: Schema.String }),
@@ -113,6 +122,8 @@ const materializers = State.SQLite.materializers(events, {
     tables.todos.update({ deletedAt }).where({ id }),
   "v1.TodoClearedCompleted": ({ deletedAt }) =>
     tables.todos.update({ deletedAt }).where({ completed: true }),
+  "v1.CategoryCreated": ({ id, color, name }) =>
+    tables.categories.insert({ id, name, color }),
   "v1.EventStarted": ({ categoryId, startedAt, id }) =>
     tables.events.insert({ categoryId, startedAt, id }),
   "v1.EventEnded": ({ endedAt, eventId }) =>
