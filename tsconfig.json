@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "preserve",
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -17,12 +17,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
+    /* Type Safety */
     "strict": true,
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
 
     /* Effect Language Service */

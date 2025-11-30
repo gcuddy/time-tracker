@@ -37,7 +37,9 @@
     "build": "vite build",
     "deploy": "pnpm run build && bunx wrangler deploy",
     "dev": "vite --force",
+    "prepare": "effect-language-service patch",
     "preview": "vite preview",
-    "test": "playwright test"
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit"
   }
 }
