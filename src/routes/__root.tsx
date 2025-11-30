@@ -11,6 +11,7 @@ import { SyncPayload, schema } from "../livestore/schema.ts";
 import LiveStoreWorker from "../livestore.worker.ts?worker";
 import { getStoreId } from "../util/store-id.ts";
 import { Layout } from "../components/Layout.tsx";
+import { FloatingTimer } from "@/components/FloatingTimer";
 
 const storeId = getStoreId();
 
@@ -283,6 +284,9 @@ function RootComponent() {
           </Layout.Main.Header>
           <Layout.Main.Body>
             <Outlet />
+            <div className="absolute bottom-16 inset-x-16 rounded-4xl ring-1 ring-zinc-900/15 bg-zinc-200/90 backdrop-blur-2xl">
+              <FloatingTimer />
+            </div>
           </Layout.Main.Body>
         </Layout.Main>
       </Layout>

@@ -67,41 +67,41 @@ function SidebarDivider() {
 }
 
 // Base anchor component for createLink
-interface SidebarLinkBaseProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface SidebarLinkBaseProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   icon?: React.ReactNode;
   active?: boolean;
 }
 
-const SidebarLinkBase = React.forwardRef<HTMLAnchorElement, SidebarLinkBaseProps>(
-  ({ children, icon, active = false, className, ...props }, ref) => {
-    const baseClasses =
-      "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors";
-    const activeClasses = active
-      ? "bg-zinc-950/5 dark:bg-white/5 text-zinc-950 dark:text-white"
-      : "text-zinc-600 hover:bg-zinc-950/5 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white";
+const SidebarLinkBase = React.forwardRef<
+  HTMLAnchorElement,
+  SidebarLinkBaseProps
+>(({ children, icon, active = false, className, ...props }, ref) => {
+  const baseClasses =
+    "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors";
+  const activeClasses = active
+    ? "bg-zinc-950/5 dark:bg-white/5 text-zinc-950 dark:text-white"
+    : "text-zinc-600 hover:bg-zinc-950/5 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white";
 
-    return (
-      <span className="relative">
-        <a
-          ref={ref}
-          className={`${baseClasses} ${activeClasses} ${className ?? ""}`}
-          {...props}
-        >
-          {icon && (
-            <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
-              {icon}
-            </span>
-          )}
-          <span className="truncate">{children}</span>
-          {active && (
-            <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
-          )}
-        </a>
-      </span>
-    );
-  }
-);
+  return (
+    <span className="relative">
+      <a
+        ref={ref}
+        className={`${baseClasses} ${activeClasses} ${className ?? ""}`}
+        {...props}
+      >
+        {icon && (
+          <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
+            {icon}
+          </span>
+        )}
+        <span className="truncate">{children}</span>
+        {active && (
+          <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
+        )}
+      </a>
+    </span>
+  );
+});
 SidebarLinkBase.displayName = "SidebarLinkBase";
 
 // Create router-aware link using createLink
@@ -253,8 +253,8 @@ const Sidebar = Object.assign(SidebarRoot, {
 // Main content area
 function Main({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col py-2 pr-2">
-      <div className="grow rounded-lg shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 overflow-hidden">
+    <div className="relative flex flex-1 flex-col py-2 pr-2">
+      <div className="grow rounded-lg flex flex-col shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 overflow-hidden">
         {children}
       </div>
     </div>
@@ -274,7 +274,7 @@ function MainTitle({ children }: { children: React.ReactNode }) {
 }
 
 function MainBody({ children }: { children: React.ReactNode }) {
-  return <div className="p-6 overflow-auto flex-1">{children}</div>;
+  return <div className="p-6 overflow-auto grow">{children}</div>;
 }
 
 const MainArea = Object.assign(Main, {

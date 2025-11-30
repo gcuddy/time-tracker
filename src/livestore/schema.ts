@@ -34,6 +34,7 @@ export const tables = {
         schema: Schema.DateFromNumber,
       }),
       color: State.SQLite.text({ nullable: false }),
+      parentId: State.SQLite.text({ nullable: true }),
     },
   }),
   events: State.SQLite.table({
