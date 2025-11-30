@@ -1,0 +1,3 @@
+node_modules
+.wrangler/state/v3/do/example-web-todomvc-sync-cf-SyncBackendDO
+tsconfig.json.backup
