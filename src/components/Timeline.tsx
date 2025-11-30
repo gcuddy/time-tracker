@@ -55,6 +55,14 @@ export const Timeline: React.FC = () => {
       }),
     );
 
+  const timerStopped = (eventId: string) =>
+    store.commit(
+      events.eventEnded({
+        endedAt: new Date(),
+        eventId,
+      }),
+    );
+
   return (
     <div className="space-y-4">
       <div className="flex gap-3 items-center">
@@ -89,7 +97,9 @@ export const Timeline: React.FC = () => {
             >
               <div className="flex justify-between items-center">
                 <span className="text-neutral-700">
-                  Category: {timer.categoryId}
+                  Category:{" "}
+                  {visibleCategories.find((c) => c.id === timer.categoryId)
+                    ?.name ?? timer.categoryId}
                 </span>
                 <span className="text-2xl font-mono font-bold text-green-700">
                   {formatDuration(timer.startedAt, now)}
@@ -98,6 +108,7 @@ export const Timeline: React.FC = () => {
               <p className="text-sm text-neutral-500 mt-1">
                 Started: {timer.startedAt.toLocaleTimeString()}
               </p>
+              <button onClick={() => timerStopped(timer.id)}>Stop</button>
             </div>
           ))}
         </div>
