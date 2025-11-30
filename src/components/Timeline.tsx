@@ -56,23 +56,52 @@ export const Timeline: React.FC = () => {
     );
 
   return (
-    <div>
-      <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-        {visibleCategories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-      <button onClick={timerStarted}>start timer</button>
-      running timers:
-      {runningTimers.map((timer) => (
-        <span key={timer.id}>
-          Timer running: {timer.categoryId}
-          Started: {timer.startedAt.toISOString()}
-          Running for: {formatDuration(timer.startedAt, now)}
-        </span>
-      ))}
+    <div className="space-y-4">
+      <div className="flex gap-3 items-center">
+        <select
+          value={selected}
+          onChange={(e) => setSelected(e.target.value)}
+          className="px-4 py-2 border border-neutral-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {visibleCategories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={timerStarted}
+          className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Start Timer
+        </button>
+      </div>
+
+      {runningTimers.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+            Running Timers
+          </h3>
+          {runningTimers.map((timer) => (
+            <div
+              key={timer.id}
+              className="p-4 bg-green-50 border border-green-200 rounded-lg"
+            >
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-700">
+                  Category: {timer.categoryId}
+                </span>
+                <span className="text-2xl font-mono font-bold text-green-700">
+                  {formatDuration(timer.startedAt, now)}
+                </span>
+              </div>
+              <p className="text-sm text-neutral-500 mt-1">
+                Started: {timer.startedAt.toLocaleTimeString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

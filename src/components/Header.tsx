@@ -17,10 +17,10 @@ export const Header: React.FC = () => {
     )
 
   return (
-    <header className="header">
-      <h1>TodoMVC</h1>
+    <header className="mb-6">
+      <h1 className="text-3xl font-bold text-neutral-800 mb-4">TodoMVC</h1>
       <input
-        className="new-todo"
+        className="w-full px-4 py-3 text-lg border border-neutral-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-neutral-400"
         placeholder="What needs to be done?"
         value={newTodoText}
         onChange={(e) => updatedNewTodoText(e.target.value)}

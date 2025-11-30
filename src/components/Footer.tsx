@@ -16,31 +16,40 @@ export const Footer: React.FC = () => {
   const setFilter = (filter: (typeof tables.uiState.Value)['filter']) => store.commit(events.uiStateSet({ filter }))
 
   return (
-    <footer className="footer">
-      <span className="todo-count">{incompleteCount} items left</span>
-      <ul className="filters">
+    <footer className="mt-6 pt-4 border-t border-neutral-200 flex items-center justify-between text-sm">
+      <span className="text-neutral-600">{incompleteCount} items left</span>
+      <ul className="flex gap-2">
         <li>
-          {/* biome-ignore lint/a11y/useValidAnchor: TodoMVC standard convention for filter buttons */}
-          <a href="#/" className={filter === 'all' ? 'selected' : ''} onClick={() => setFilter('all')}>
+          <button
+            type="button"
+            className={`px-3 py-1 rounded ${filter === 'all' ? 'bg-neutral-200 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-100'}`}
+            onClick={() => setFilter('all')}
+          >
             All
-          </a>
+          </button>
         </li>
         <li>
-          {/* biome-ignore lint/a11y/useValidAnchor: TodoMVC standard convention for filter buttons */}
-          <a href="#/" className={filter === 'active' ? 'selected' : ''} onClick={() => setFilter('active')}>
+          <button
+            type="button"
+            className={`px-3 py-1 rounded ${filter === 'active' ? 'bg-neutral-200 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-100'}`}
+            onClick={() => setFilter('active')}
+          >
             Active
-          </a>
+          </button>
         </li>
         <li>
-          {/* biome-ignore lint/a11y/useValidAnchor: TodoMVC standard convention for filter buttons */}
-          <a href="#/" className={filter === 'completed' ? 'selected' : ''} onClick={() => setFilter('completed')}>
+          <button
+            type="button"
+            className={`px-3 py-1 rounded ${filter === 'completed' ? 'bg-neutral-200 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-100'}`}
+            onClick={() => setFilter('completed')}
+          >
             Completed
-          </a>
+          </button>
         </li>
       </ul>
       <button
         type="button"
-        className="clear-completed"
+        className="text-red-600 hover:text-red-700 hover:underline"
         onClick={() => store.commit(events.todoClearedCompleted({ deletedAt: new Date() }))}
       >
         Clear completed

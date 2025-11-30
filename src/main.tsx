@@ -1,13 +1,10 @@
-import 'todomvc-app-css/index.css'
+import "./styles.css";
 
-import ReactDOM from 'react-dom/client'
+import { RouterProvider } from "@tanstack/react-router";
+import ReactDOM from "react-dom/client";
 
-import { App } from './Root.tsx'
+import { router } from "./router.tsx";
 
-ReactDOM.createRoot(document.getElementById('react-app')!).render(<App />)
-
-// ReactDOM.createRoot(document.getElementById('react-app')!).render(
-//   <React.StrictMode>
-//     <App />
-//   </React.StrictMode>,
-// )
+ReactDOM.createRoot(document.getElementById("react-app")!).render(
+  <RouterProvider router={router} />
+);
