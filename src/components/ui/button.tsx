@@ -36,12 +36,13 @@ const buttonVariants = cva(
         ghost:
           "text-muted-foreground data-hovered:bg-accent data-hovered:text-foreground",
         link: "text-primary underline-offset-4 data-hovered:underline data-hovered:text-amber-400",
+        icon: "text-muted-foreground bg-transparent hover:bg-accent hover:text-foreground border-none p-2 h-auto aspect-square",
       },
       size: {
-        default: "h-10 px-4 py-2",
+        default: "h-9 px-4 py-2 text-sm",
         sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-12 rounded-xl px-8 text-base",
-        icon: "size-10 rounded-lg",
+        lg: "h-10 rounded-lg px-8 text-base",
+        icon: "size-9 rounded-lg p-0 flex items-center justify-center",
       },
     },
     defaultVariants: {

@@ -19,43 +19,43 @@ body {
 /* Warm dark theme with amber accents */
 :root {
   color-scheme: dark;
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
   /* Base - Deep zinc for that premium dark feel */
   --background: oklch(0.12 0.004 285);
-  --foreground: oklch(0.95 0.01 90);
+  --foreground: oklch(0.98 0 0);
 
   /* Cards - Slightly lighter zinc surface */
-  --card: oklch(0.18 0.005 285);
-  --card-foreground: oklch(0.95 0.01 90);
+  --card: oklch(0.15 0.004 285);
+  --card-foreground: oklch(0.98 0 0);
 
   /* Popovers - Match card */
-  --popover: oklch(0.18 0.005 285);
-  --popover-foreground: oklch(0.95 0.01 90);
+  --popover: oklch(0.15 0.004 285);
+  --popover-foreground: oklch(0.98 0 0);
 
   /* Primary - Amber 500 (warm golden accent) */
   --primary: oklch(0.82 0.165 84);
-  --primary-foreground: oklch(0.15 0.005 285);
+  --primary-foreground: oklch(0.12 0.004 285);
 
   /* Secondary - Zinc 800 */
   --secondary: oklch(0.27 0.005 285);
-  --secondary-foreground: oklch(0.92 0.01 90);
+  --secondary-foreground: oklch(0.98 0 0);
 
   /* Muted - For subtle backgrounds */
-  --muted: oklch(0.24 0.005 285);
-  --muted-foreground: oklch(0.63 0.015 285);
+  --muted: oklch(0.2 0.005 285);
+  --muted-foreground: oklch(0.6 0.01 285);
 
   /* Accent - Zinc 700 for hover states */
-  --accent: oklch(0.35 0.01 285);
-  --accent-foreground: oklch(0.95 0.01 90);
+  --accent: oklch(0.25 0.005 285);
+  --accent-foreground: oklch(0.98 0 0);
 
   /* Destructive - Soft red that fits dark theme */
   --destructive: oklch(0.65 0.2 25);
   --destructive-foreground: oklch(0.98 0 0);
 
   /* Borders - Subtle zinc with transparency */
-  --border: oklch(0.4 0.01 285 / 40%);
-  --input: oklch(0.4 0.01 285 / 50%);
+  --border: oklch(0.3 0.01 285 / 30%);
+  --input: oklch(0.3 0.01 285 / 30%);
 
   /* Ring - Amber for focus states */
   --ring: oklch(0.82 0.165 84 / 50%);
@@ -68,13 +68,13 @@ body {
   --chart-5: oklch(0.6 0.18 300);
 
   /* Sidebar - Deep dark */
-  --sidebar: oklch(0.14 0.004 285);
-  --sidebar-foreground: oklch(0.95 0.01 90);
+  --sidebar: oklch(0.12 0.004 285);
+  --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.82 0.165 84);
-  --sidebar-primary-foreground: oklch(0.15 0.005 285);
-  --sidebar-accent: oklch(0.27 0.005 285);
-  --sidebar-accent-foreground: oklch(0.95 0.01 90);
-  --sidebar-border: oklch(0.4 0.01 285 / 30%);
+  --sidebar-primary-foreground: oklch(0.12 0.004 285);
+  --sidebar-accent: oklch(0.2 0.005 285);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.3 0.01 285 / 20%);
   --sidebar-ring: oklch(0.82 0.165 84 / 50%);
 }
 
@@ -138,17 +138,35 @@ body {
 
   /* Custom scrollbar for webkit browsers */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.4 0.01 285 / 40%);
-    border-radius: 4px;
+    background: oklch(0.4 0.01 285 / 20%);
+    border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.5 0.01 285 / 60%);
+    background: oklch(0.5 0.01 285 / 40%);
+  }
+}
+
+@layer utilities {
+  .panel {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+  }
+  .panel-header {
+    @apply px-4 py-3 border-b border-border flex items-center justify-between gap-2;
+  }
+  .panel-body {
+    @apply p-4;
+  }
+  .surface-hover {
+    @apply hover:bg-accent/50 transition-colors cursor-pointer;
+  }
+  .text-subtle {
+    @apply text-muted-foreground text-xs;
   }
 }

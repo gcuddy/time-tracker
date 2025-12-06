@@ -4,6 +4,8 @@ import React from "react";
 
 import { uiState$ } from "../livestore/queries.ts";
 import { events, tables } from "../livestore/schema.ts";
+import { Button } from "./ui/button.tsx";
+import { Trash2 } from "lucide-react";
 
 const visibleTodos$ = queryDb(
   (get) => {
@@ -69,41 +71,31 @@ export const MainSection: React.FC = () => {
         {visibleTodos.map((todo) => (
           <li
             key={todo.id}
-            className="flex items-center gap-3 p-3 bg-white border border-neutral-200 rounded-lg group"
+            className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg group hover:border-accent transition-colors"
           >
             <input
               type="checkbox"
               checked={todo.completed}
               onChange={() => toggleTodo(todo)}
-              className="w-5 h-5 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+              className="w-4 h-4 rounded border-input text-primary focus:ring-ring bg-transparent"
             />
             <span
-              className={`flex-1 ${todo.completed ? "line-through text-neutral-400" : "text-neutral-800"}`}
+              className={`flex-1 text-sm ${todo.completed ? "line-through text-muted-foreground" : "text-foreground"}`}
             >
               {todo.text}
             </span>
-            <button
-              type="button"
-              className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition-opacity"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="opacity-0 group-hover:opacity-100 h-8 w-8 text-muted-foreground hover:text-destructive"
               onClick={() =>
                 store.commit(
                   events.todoDeleted({ id: todo.id, deletedAt: new Date() }),
                 )
               }
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </li>
         ))}
       </ul>

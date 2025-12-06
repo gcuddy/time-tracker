@@ -1,9 +1,27 @@
 import * as React from "react";
 import { createLink, type LinkComponent } from "@tanstack/react-router";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+// Context for sidebar state
+interface SidebarContextValue {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+const SidebarContext = React.createContext<SidebarContextValue | undefined>(undefined);
+
+function useSidebar() {
+  const context = React.useContext(SidebarContext);
+  if (!context) {
+    throw new Error("useSidebar must be used within a SidebarProvider");
+  }
+  return context;
+}
 
 function Root({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex isolate relative w-full min-h-svh bg-zinc-100 dark:bg-zinc-950 dark:text-zinc-50">
+    <div className="flex isolate relative w-full min-h-svh bg-background text-foreground">
       {children}
     </div>
   );
@@ -11,28 +29,52 @@ function Root({ children }: { children: React.ReactNode }) {
 
 // Sidebar Components
 function SidebarRoot({ children }: { children: React.ReactNode }) {
+  const [collapsed, setCollapsed] = React.useState(false);
+
   return (
-    <div className="w-64 flex flex-col">
-      <nav className="flex h-full min-h-0 flex-col">{children}</nav>
-    </div>
+    <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
+      <div
+        className={`flex flex-col transition-all duration-300 ease-in-out ${
+          collapsed ? "w-[60px]" : "w-64"
+        } border-r border-sidebar-border bg-sidebar text-sidebar-foreground`}
+      >
+        <nav className="flex h-full min-h-0 flex-col">{children}</nav>
+      </div>
+    </SidebarContext.Provider>
   );
 }
 
 function SidebarHeader({ children }: { children: React.ReactNode }) {
-  return <div className="p-4 pb-2">{children}</div>;
+  const { collapsed, setCollapsed } = useSidebar();
+  return (
+    <div className={`flex items-center ${collapsed ? "justify-center p-2" : "justify-between p-4"} pb-2`}>
+      {!collapsed && <div className="flex-1 min-w-0">{children}</div>}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+        onClick={() => setCollapsed(!collapsed)}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
 }
 
 function SidebarBody({ children }: { children: React.ReactNode }) {
+  const { collapsed } = useSidebar();
   return (
-    <div className="flex flex-1 flex-col gap-1 overflow-y-auto p-4 pt-2">
+    <div className={`flex flex-1 flex-col gap-1 overflow-y-auto ${collapsed ? "p-2" : "p-4"} pt-2`}>
       {children}
     </div>
   );
 }
 
 function SidebarFooter({ children }: { children: React.ReactNode }) {
+  const { collapsed } = useSidebar();
   return (
-    <div className="flex flex-col border-t border-zinc-950/5 p-4 dark:border-white/5">
+    <div className={`flex flex-col border-t border-sidebar-border ${collapsed ? "p-2" : "p-4"}`}>
       {children}
     </div>
   );
@@ -49,8 +91,10 @@ function SidebarSection({
 }
 
 function SidebarLabel({ children }: { children: React.ReactNode }) {
+  const { collapsed } = useSidebar();
+  if (collapsed) return null;
   return (
-    <span className="px-2 mb-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+    <span className="px-2 mb-1 text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider">
       {children}
     </span>
   );
@@ -62,7 +106,7 @@ function SidebarSpacer() {
 
 function SidebarDivider() {
   return (
-    <hr className="my-4 border-t border-zinc-950/5 dark:border-white/5 lg:-mx-4" />
+    <hr className="my-4 border-t border-sidebar-border lg:-mx-4" />
   );
 }
 
@@ -70,36 +114,40 @@ function SidebarDivider() {
 interface SidebarLinkBaseProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   icon?: React.ReactNode;
   active?: boolean;
+  title?: string;
 }
 
 const SidebarLinkBase = React.forwardRef<
   HTMLAnchorElement,
   SidebarLinkBaseProps
->(({ children, icon, active = false, className, ...props }, ref) => {
+>(({ children, icon, active = false, className, title, ...props }, ref) => {
+  const { collapsed } = useSidebar();
+  
   const baseClasses =
-    "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors";
+    "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors relative group";
   const activeClasses = active
-    ? "bg-zinc-950/5 dark:bg-white/5 text-zinc-950 dark:text-white"
-    : "text-zinc-600 hover:bg-zinc-950/5 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white";
+    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
+    
+  const collapsedClasses = collapsed ? "justify-center px-2" : "";
 
   return (
-    <span className="relative">
-      <a
-        ref={ref}
-        className={`${baseClasses} ${activeClasses} ${className ?? ""}`}
-        {...props}
-      >
-        {icon && (
-          <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
-            {icon}
-          </span>
-        )}
-        <span className="truncate">{children}</span>
-        {active && (
-          <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
-        )}
-      </a>
-    </span>
+    <a
+      ref={ref}
+      className={`${baseClasses} ${activeClasses} ${collapsedClasses} ${className ?? ""}`}
+      title={collapsed ? (typeof children === 'string' ? children : title) : undefined}
+      {...props}
+    >
+      {icon && (
+        <span className={`flex-shrink-0 w-5 h-5 ${active ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground"}`}>
+          {icon}
+        </span>
+      )}
+      {!collapsed && <span className="truncate">{children}</span>}
+      {active && !collapsed && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-sidebar-primary rounded-r-full" />
+      )}
+    </a>
   );
 });
 SidebarLinkBase.displayName = "SidebarLinkBase";
@@ -126,30 +174,31 @@ function SidebarButton({
   active = false,
   onClick,
 }: SidebarButtonProps) {
+  const { collapsed } = useSidebar();
   const baseClasses =
-    "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors";
+    "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm font-medium transition-colors relative group";
   const activeClasses = active
-    ? "bg-zinc-950/5 dark:bg-white/5 text-zinc-950 dark:text-white"
-    : "text-zinc-600 hover:bg-zinc-950/5 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white";
+    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground";
+  const collapsedClasses = collapsed ? "justify-center px-2" : "";
 
   return (
-    <span className="relative">
-      <button
-        type="button"
-        onClick={onClick}
-        className={`${baseClasses} ${activeClasses}`}
-      >
-        {icon && (
-          <span className="flex-shrink-0 w-5 h-5 text-zinc-500 dark:text-zinc-400">
-            {icon}
-          </span>
-        )}
-        <span className="truncate">{children}</span>
-        {active && (
-          <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-zinc-950 dark:bg-white rounded-r" />
-        )}
-      </button>
-    </span>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${baseClasses} ${activeClasses} ${collapsedClasses}`}
+      title={collapsed ? (typeof children === 'string' ? children : undefined) : undefined}
+    >
+      {icon && (
+        <span className={`flex-shrink-0 w-5 h-5 ${active ? "text-sidebar-primary" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground"}`}>
+          {icon}
+        </span>
+      )}
+      {!collapsed && <span className="truncate">{children}</span>}
+      {active && !collapsed && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-sidebar-primary rounded-r-full" />
+      )}
+    </button>
   );
 }
 
@@ -161,30 +210,21 @@ function SidebarHeaderButton({
   children: React.ReactNode;
   icon?: React.ReactNode;
 }) {
+  const { collapsed } = useSidebar();
+  
+  if (collapsed) return null;
+  
   return (
     <button
       type="button"
-      className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-zinc-950/5 dark:hover:bg-white/5 transition-colors"
+      className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-sidebar-accent/50 transition-colors w-full"
     >
       {icon && (
-        <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-xs font-bold">
+        <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
           {icon}
         </span>
       )}
-      <span className="font-semibold text-sm">{children}</span>
-      <svg
-        className="w-4 h-4 text-zinc-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={2}
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-        />
-      </svg>
+      <span className="font-semibold text-sm text-sidebar-foreground">{children}</span>
     </button>
   );
 }
@@ -199,39 +239,31 @@ function SidebarUserProfile({
   email: string;
   avatar?: string;
 }) {
+  const { collapsed } = useSidebar();
+
   return (
     <button
       type="button"
-      className="flex items-center gap-3 rounded-lg p-2 hover:bg-zinc-950/5 dark:hover:bg-white/5 transition-colors w-full"
+      className={`flex items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent/50 transition-colors w-full ${collapsed ? "justify-center" : ""}`}
+      title={collapsed ? name : undefined}
     >
-      <div className="w-10 h-10 rounded-full bg-zinc-300 dark:bg-zinc-700 overflow-hidden flex-shrink-0">
+      <div className="w-8 h-8 rounded-full bg-sidebar-accent overflow-hidden flex-shrink-0 border border-sidebar-border">
         {avatar ? (
           <img src={avatar} alt={name} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-medium">
+          <div className="w-full h-full flex items-center justify-center text-sidebar-foreground/70 font-medium text-xs">
             {name.charAt(0)}
           </div>
         )}
       </div>
-      <div className="flex-1 text-left min-w-0">
-        <div className="text-sm font-medium truncate">{name}</div>
-        <div className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-          {email}
+      {!collapsed && (
+        <div className="flex-1 text-left min-w-0">
+          <div className="text-sm font-medium truncate text-sidebar-foreground">{name}</div>
+          <div className="text-xs text-sidebar-foreground/50 truncate">
+            {email}
+          </div>
         </div>
-      </div>
-      <svg
-        className="w-4 h-4 text-zinc-400 flex-shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={2}
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M4.5 15.75l7.5-7.5 7.5 7.5"
-        />
-      </svg>
+      )}
     </button>
   );
 }
@@ -253,34 +285,35 @@ const Sidebar = Object.assign(SidebarRoot, {
 // Main content area
 function Main({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex flex-1 flex-col py-2 pr-2">
-      <div className="grow rounded-lg flex flex-col shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10 overflow-hidden">
-        {children}
-      </div>
+    <div className="relative flex flex-1 flex-col bg-background">
+      {children}
     </div>
   );
 }
 
 function MainHeader({ children }: { children: React.ReactNode }) {
   return (
-    <header className="px-6 py-6 border-b border-zinc-950/5 dark:border-white/10">
+    <header className="px-6 py-4 border-b border-border flex items-center gap-4 h-16">
       {children}
     </header>
   );
 }
 
 function MainTitle({ children }: { children: React.ReactNode }) {
-  return <h1 className="text-xl font-semibold">{children}</h1>;
+  return <h1 className="text-lg font-semibold text-foreground">{children}</h1>;
 }
 
 function MainBody({ children }: { children: React.ReactNode }) {
-  return <div className="p-6 overflow-auto grow">{children}</div>;
+  return <div className="p-6 overflow-auto grow bg-muted/30">{children}</div>;
 }
 
 const MainArea = Object.assign(Main, {
   Header: MainHeader,
   Title: MainTitle,
   Body: MainBody,
+  Container: ({ children }: { children: React.ReactNode }) => (
+    <div className="max-w-5xl mx-auto w-full space-y-6">{children}</div>
+  )
 });
 
 export const Layout = Object.assign(Root, {

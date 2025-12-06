@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TimersIndexRouteImport } from './routes/timers/index'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const TimersIndexRoute = TimersIndexRouteImport.update({
   path: '/timers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesIndexRoute
   '/timers': typeof TimersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesIndexRoute
   '/timers': typeof TimersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories/': typeof CategoriesIndexRoute
   '/timers/': typeof TimersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/timers'
+  fullPaths: '/' | '/categories' | '/timers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/timers'
-  id: '__root__' | '/' | '/timers/'
+  to: '/' | '/categories' | '/timers'
+  id: '__root__' | '/' | '/categories/' | '/timers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
   TimersIndexRoute: typeof TimersIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesIndexRoute: CategoriesIndexRoute,
   TimersIndexRoute: TimersIndexRoute,
 }
 export const routeTree = rootRouteImport
