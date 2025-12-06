@@ -38,6 +38,35 @@ export const eventsWithCategories$ = queryDb(
 );
 
 /**
+ * Running timers (events without endedAt) joined with their category data.
+ * Used by FloatingTimer to display running timer info with category name/color.
+ */
+export const runningTimersWithCategory$ = queryDb(
+  {
+    query: sql`
+      SELECT 
+        events.*,
+        categories.name as categoryName,
+        categories.color as categoryColor
+      FROM events
+      LEFT JOIN categories ON events.categoryId = categories.id
+      WHERE events.endedAt IS NULL
+      ORDER BY events.startedAt DESC
+    `,
+    schema: tables.events.rowSchema.pipe(
+      Schema.extend(
+        Schema.Struct({
+          categoryName: Schema.NullOr(Schema.String),
+          categoryColor: Schema.NullOr(Schema.String),
+        }),
+      ),
+      Schema.Array,
+    ),
+  },
+  { label: "runningTimersWithCategory" },
+);
+
+/**
  * Get a category with its children by parent ID.
  * Uses a self-join to fetch the parent category and all its direct children.
  */
