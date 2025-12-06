@@ -39,7 +39,8 @@ const NAV_ITEMS = [
 ];
 
 function RootComponent() {
-  const { username, setUsername, clearUsername, hasUsername, storeId } = useUsername();
+  const { username, setUsername, clearUsername, hasUsername, storeId } =
+    useUsername();
 
   // Show username gate if no username is set
   if (!hasUsername || !username || !storeId) {
@@ -71,12 +72,13 @@ function AuthenticatedApp({
   storeId: string;
   onLogout: () => void;
 }) {
-  // Memoize syncPayload to include username
+  // Memoize syncPayload - keep original token for CF worker compatibility
+  // In a real app, you'd implement proper auth in the worker
   const syncPayload = useMemo(
     () => ({
-      authToken: `user-${username}`,
+      authToken: "insecure-token-change-me",
     }),
-    [username]
+    []
   );
 
   return (
@@ -89,7 +91,9 @@ function AuthenticatedApp({
             <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 animate-pulse">
               <Clock className="w-6 h-6 text-zinc-900" />
             </div>
-            <p className="text-muted-foreground">Loading LiveStore ({_.stage})...</p>
+            <p className="text-muted-foreground">
+              Loading LiveStore ({_.stage})...
+            </p>
           </div>
         </div>
       )}
