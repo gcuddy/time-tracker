@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TimersIndexRouteImport } from './routes/timers/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as CategoriesCategoryIdRouteImport } from './routes/categories/$categoryId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,33 +29,42 @@ const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
   path: '/categories/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesCategoryIdRoute = CategoriesCategoryIdRouteImport.update({
+  id: '/categories/$categoryId',
+  path: '/categories/$categoryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories/$categoryId': typeof CategoriesCategoryIdRoute
   '/categories': typeof CategoriesIndexRoute
   '/timers': typeof TimersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories/$categoryId': typeof CategoriesCategoryIdRoute
   '/categories': typeof CategoriesIndexRoute
   '/timers': typeof TimersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories/$categoryId': typeof CategoriesCategoryIdRoute
   '/categories/': typeof CategoriesIndexRoute
   '/timers/': typeof TimersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/categories' | '/timers'
+  fullPaths: '/' | '/categories/$categoryId' | '/categories' | '/timers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/categories' | '/timers'
-  id: '__root__' | '/' | '/categories/' | '/timers/'
+  to: '/' | '/categories/$categoryId' | '/categories' | '/timers'
+  id: '__root__' | '/' | '/categories/$categoryId' | '/categories/' | '/timers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesCategoryIdRoute: typeof CategoriesCategoryIdRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   TimersIndexRoute: typeof TimersIndexRoute
 }
@@ -82,11 +92,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories/$categoryId': {
+      id: '/categories/$categoryId'
+      path: '/categories/$categoryId'
+      fullPath: '/categories/$categoryId'
+      preLoaderRoute: typeof CategoriesCategoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesCategoryIdRoute: CategoriesCategoryIdRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
   TimersIndexRoute: TimersIndexRoute,
 }

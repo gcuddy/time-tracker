@@ -6,7 +6,7 @@ export const uiState$ = queryDb(tables.uiState.get(), { label: "uiState" });
 
 export const categories$ = queryDb(
   tables.categories.where({ deletedAt: null }),
-  { label: "categories" },
+  { label: "categories" }
 );
 
 /**
@@ -29,12 +29,12 @@ export const eventsWithCategories$ = queryDb(
         Schema.Struct({
           categoryName: Schema.NullOr(Schema.String),
           categoryColor: Schema.NullOr(Schema.String),
-        }),
+        })
       ),
-      Schema.Array,
+      Schema.Array
     ),
   },
-  { label: "eventsWithCategories" },
+  { label: "eventsWithCategories" }
 );
 
 /**
@@ -58,12 +58,12 @@ export const runningTimersWithCategory$ = queryDb(
         Schema.Struct({
           categoryName: Schema.NullOr(Schema.String),
           categoryColor: Schema.NullOr(Schema.String),
-        }),
+        })
       ),
-      Schema.Array,
+      Schema.Array
     ),
   },
-  { label: "runningTimersWithCategory" },
+  { label: "runningTimersWithCategory" }
 );
 
 /**
@@ -93,10 +93,119 @@ export const categoryWithChildren$ = (categoryId: string) =>
             childColor: Schema.NullOr(Schema.String),
             childCreatedAt: Schema.NullOr(Schema.DateFromNumber),
             childDeletedAt: Schema.NullOr(Schema.DateFromNumber),
-          }),
+          })
         ),
-        Schema.Array,
+        Schema.Array
       ),
     },
-    { label: `categoryWithChildren:${categoryId}` },
+    { label: `categoryWithChildren:${categoryId}` }
   );
+
+/**
+ * All non-deleted tags ordered by name.
+ */
+export const tags$ = queryDb(
+  {
+    query: sql`
+      SELECT * FROM tags
+      WHERE deletedAt IS NULL
+      ORDER BY name ASC
+    `,
+    schema: tables.tags.rowSchema.pipe(Schema.Array),
+  },
+  { label: "tags" }
+);
+
+/**
+ * Helper query to fetch tags for a single event.
+ */
+export const tagsForEvent$ = (eventId: string) =>
+  queryDb(
+    {
+      query: sql`
+        SELECT tags.*
+        FROM tags
+        INNER JOIN eventTags ON eventTags.tagId = tags.id
+        WHERE eventTags.eventId = ${eventId} AND tags.deletedAt IS NULL
+        ORDER BY tags.name ASC
+      `,
+      schema: tables.tags.rowSchema.pipe(Schema.Array),
+    },
+    { label: `tagsForEvent:${eventId}` }
+  );
+
+/**
+ * Events joined with their category data and tags (as JSON array).
+ * Uses GROUP BY with JSON_GROUP_ARRAY to aggregate tags per event.
+ */
+export const eventsWithCategoriesAndTags$ = queryDb(
+  {
+    query: sql`
+      SELECT 
+        events.*,
+        categories.name as categoryName,
+        categories.color as categoryColor,
+        COALESCE(
+          (SELECT JSON_GROUP_ARRAY(JSON_OBJECT('id', tags.id, 'name', tags.name, 'color', tags.color))
+           FROM eventTags
+           INNER JOIN tags ON tags.id = eventTags.tagId AND tags.deletedAt IS NULL
+           WHERE eventTags.eventId = events.id),
+          '[]'
+        ) as tagsJson
+      FROM events
+      LEFT JOIN categories ON events.categoryId = categories.id
+      ORDER BY events.startedAt DESC
+    `,
+    schema: tables.events.rowSchema.pipe(
+      Schema.extend(
+        Schema.Struct({
+          categoryName: Schema.NullOr(Schema.String),
+          categoryColor: Schema.NullOr(Schema.String),
+          tagsJson: Schema.String,
+        })
+      ),
+      Schema.Array
+    ),
+  },
+  { label: "eventsWithCategoriesAndTags" }
+);
+
+/**
+ * Type for a tag attached to an event.
+ */
+export type EventTag = {
+  id: string;
+  name: string;
+  color: string | null;
+};
+
+/**
+ * Parse the tagsJson field from eventsWithCategoriesAndTags$ into a typed array.
+ */
+export const parseTagsJson = (tagsJson: string): EventTag[] => {
+  try {
+    return JSON.parse(tagsJson) as EventTag[];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Get a single category by ID.
+ */
+export const categoryById$ = (categoryId: string) =>
+  queryDb(
+    tables.categories
+      .where({ id: categoryId, deletedAt: null })
+      .first({ behaviour: "error" }),
+    { label: `categoryById:${categoryId}`, deps: [categoryId] }
+  );
+
+/**
+ * Get direct children of a category (one level deep only).
+ */
+export const categoryChildren$ = (categoryId: string) =>
+  queryDb(tables.categories.where({ parentId: categoryId, deletedAt: null }), {
+    label: `categoryChildren:${categoryId}`,
+    deps: [categoryId],
+  });

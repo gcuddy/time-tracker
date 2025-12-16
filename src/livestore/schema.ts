@@ -55,6 +55,34 @@ export const tables = {
       }),
     },
   }),
+  tags: State.SQLite.table({
+    name: "tags",
+    columns: {
+      id: State.SQLite.text({ primaryKey: true }),
+      name: State.SQLite.text({ nullable: false }),
+      color: State.SQLite.text({ nullable: true }),
+      createdAt: State.SQLite.integer({
+        nullable: true,
+        schema: Schema.DateFromNumber,
+      }),
+      deletedAt: State.SQLite.integer({
+        nullable: true,
+        schema: Schema.DateFromNumber,
+      }),
+    },
+  }),
+  eventTags: State.SQLite.table({
+    name: "eventTags",
+    columns: {
+      id: State.SQLite.text({ primaryKey: true }),
+      eventId: State.SQLite.text({ nullable: false }),
+      tagId: State.SQLite.text({ nullable: false }),
+      createdAt: State.SQLite.integer({
+        nullable: true,
+        schema: Schema.DateFromNumber,
+      }),
+    },
+  }),
   // Client documents can be used for local-only state (e.g. form inputs)
   uiState: State.SQLite.clientDocument({
     name: "uiState",
@@ -102,11 +130,55 @@ export const events = {
       name: Schema.String,
       color: Schema.String,
       id: Schema.String,
+      parentId: Schema.optional(Schema.NullOr(Schema.String)),
     }),
+  }),
+  categoryRenamed: Events.synced({
+    name: "v1.CategoryRenamed",
+    schema: Schema.Struct({ id: Schema.String, name: Schema.String }),
+  }),
+  categoryColorUpdated: Events.synced({
+    name: "v1.CategoryColorUpdated",
+    schema: Schema.Struct({ id: Schema.String, color: Schema.String }),
+  }),
+  categoryDeleted: Events.synced({
+    name: "v1.CategoryDeleted",
+    schema: Schema.Struct({ id: Schema.String, deletedAt: Schema.Date }),
   }),
   eventEnded: Events.synced({
     name: "v1.EventEnded",
     schema: Schema.Struct({ endedAt: Schema.Date, eventId: Schema.String }),
+  }),
+  // Tag events
+  tagCreated: Events.synced({
+    name: "v1.TagCreated",
+    schema: Schema.Struct({
+      id: Schema.String,
+      name: Schema.String,
+      color: Schema.NullOr(Schema.String),
+      createdAt: Schema.Date,
+    }),
+  }),
+  tagRenamed: Events.synced({
+    name: "v1.TagRenamed",
+    schema: Schema.Struct({ id: Schema.String, name: Schema.String }),
+  }),
+  tagDeleted: Events.synced({
+    name: "v1.TagDeleted",
+    schema: Schema.Struct({ id: Schema.String, deletedAt: Schema.Date }),
+  }),
+  tagAssignedToEvent: Events.synced({
+    name: "v1.TagAssignedToEvent",
+    schema: Schema.Struct({
+      id: Schema.String,
+      eventId: Schema.String,
+      tagId: Schema.String,
+      createdAt: Schema.Date,
+    }),
+  }),
+  tagRemovedFromEvent: Events.synced({
+    name: "v1.TagRemovedFromEvent",
+    schema: Schema.Struct({ eventId: Schema.String, tagId: Schema.String }),
   }),
   uiStateSet: tables.uiState.set,
 };
@@ -123,12 +195,29 @@ const materializers = State.SQLite.materializers(events, {
     tables.todos.update({ deletedAt }).where({ id }),
   "v1.TodoClearedCompleted": ({ deletedAt }) =>
     tables.todos.update({ deletedAt }).where({ completed: true }),
-  "v1.CategoryCreated": ({ id, color, name }) =>
-    tables.categories.insert({ id, name, color }),
+  "v1.CategoryCreated": ({ id, color, name, parentId }) =>
+    tables.categories.insert({ id, name, color, parentId: parentId ?? null }),
+  "v1.CategoryRenamed": ({ id, name }) =>
+    tables.categories.update({ name }).where({ id }),
+  "v1.CategoryColorUpdated": ({ id, color }) =>
+    tables.categories.update({ color }).where({ id }),
+  "v1.CategoryDeleted": ({ id, deletedAt }) =>
+    tables.categories.update({ deletedAt }).where({ id }),
   "v1.EventStarted": ({ categoryId, startedAt, id }) =>
     tables.events.insert({ categoryId, startedAt, id }),
   "v1.EventEnded": ({ endedAt, eventId }) =>
     tables.events.update({ endedAt }).where({ id: eventId }),
+  // Tag materializers
+  "v1.TagCreated": ({ id, name, color, createdAt }) =>
+    tables.tags.insert({ id, name, color, createdAt }),
+  "v1.TagRenamed": ({ id, name }) =>
+    tables.tags.update({ name }).where({ id }),
+  "v1.TagDeleted": ({ id, deletedAt }) =>
+    tables.tags.update({ deletedAt }).where({ id }),
+  "v1.TagAssignedToEvent": ({ id, eventId, tagId, createdAt }) =>
+    tables.eventTags.insert({ id, eventId, tagId, createdAt }),
+  "v1.TagRemovedFromEvent": ({ eventId, tagId }) =>
+    tables.eventTags.delete().where({ eventId, tagId }),
 });
 
 const state = State.SQLite.makeState({ tables, materializers });
