@@ -6,6 +6,10 @@ compatibility_flags = [
   "nodejs_compat",
 ]
 
+# Environment variables
+[vars]
+AUTH_TOKEN = "insecure-token-change-me"
+
 [[durable_objects.bindings]]
 name = "SYNC_BACKEND_DO"
 class_name = "SyncBackendDO"

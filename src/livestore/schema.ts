@@ -149,6 +149,10 @@ export const events = {
     name: "v1.EventEnded",
     schema: Schema.Struct({ endedAt: Schema.Date, eventId: Schema.String }),
   }),
+  eventDeleted: Events.synced({
+    name: "v1.EventDeleted",
+    schema: Schema.Struct({ id: Schema.String, deletedAt: Schema.Date }),
+  }),
   // Tag events
   tagCreated: Events.synced({
     name: "v1.TagCreated",
@@ -207,6 +211,8 @@ const materializers = State.SQLite.materializers(events, {
     tables.events.insert({ categoryId, startedAt, id }),
   "v1.EventEnded": ({ endedAt, eventId }) =>
     tables.events.update({ endedAt }).where({ id: eventId }),
+  "v1.EventDeleted": ({ id, deletedAt }) =>
+    tables.events.update({ deletedAt }).where({ id }),
   // Tag materializers
   "v1.TagCreated": ({ id, name, color, createdAt }) =>
     tables.tags.insert({ id, name, color, createdAt }),

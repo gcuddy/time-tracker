@@ -40,7 +40,7 @@ export const App: React.FC = () => (
     batchUpdates={batchUpdates}
     storeId={storeId}
     syncPayloadSchema={SyncPayload}
-    syncPayload={{ authToken: "insecure-token-change-me" }}
+    syncPayload={{ authToken: import.meta.env.VITE_AUTH_TOKEN || "insecure-token-change-me" }}
   >
     <div style={{ top: 0, right: 0, position: "absolute", background: "#333" }}>
       <FPSMeter height={40} />

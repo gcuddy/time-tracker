@@ -72,11 +72,10 @@ function AuthenticatedApp({
   storeId: string;
   onLogout: () => void;
 }) {
-  // Memoize syncPayload - keep original token for CF worker compatibility
-  // In a real app, you'd implement proper auth in the worker
+  // Memoize syncPayload - auth token from environment variable
   const syncPayload = useMemo(
     () => ({
-      authToken: "insecure-token-change-me",
+      authToken: import.meta.env.VITE_AUTH_TOKEN || "insecure-token-change-me",
     }),
     []
   );

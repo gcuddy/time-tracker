@@ -15,7 +15,7 @@ import { events, tables } from "../livestore/schema.ts";
 import { visibleCategories$ } from "./MainSection.tsx";
 import { useState, useEffect, useRef } from "react";
 import { Duration } from "effect";
-import { Tag, X, Plus, Check } from "lucide-react";
+import { Tag, X, Plus, Check, Trash2 } from "lucide-react";
 
 type Category = typeof tables.categories.Type;
 
@@ -167,6 +167,14 @@ export const Timeline: React.FC = () => {
       })
     );
 
+  const timerDeleted = (eventId: string) =>
+    store.commit(
+      events.eventDeleted({
+        id: eventId,
+        deletedAt: new Date(),
+      })
+    );
+
   return (
     <div className="space-y-4">
       <div className="flex gap-3 items-center">
@@ -260,6 +268,7 @@ export const Timeline: React.FC = () => {
                   }
                   now={now}
                   onStop={() => timerStopped(timer.id)}
+                  onDelete={() => timerDeleted(timer.id)}
                 />
               );
             })
@@ -295,6 +304,7 @@ type TimerCardProps = {
   categoryPath: string;
   now: number;
   onStop: () => void;
+  onDelete: () => void;
 };
 
 const TimerCard: React.FC<TimerCardProps> = ({
@@ -304,6 +314,7 @@ const TimerCard: React.FC<TimerCardProps> = ({
   categoryPath,
   now,
   onStop,
+  onDelete,
 }) => {
   const { store } = useStore();
   const [isEditingTags, setIsEditingTags] = useState(false);
@@ -478,18 +489,31 @@ const TimerCard: React.FC<TimerCardProps> = ({
 
       <div className="flex justify-between items-center text-xs text-muted-foreground">
         <span>Started: {timer.startedAt.toLocaleTimeString()}</span>
-        {timer.endedAt ? (
-          <span>Ended: {timer.endedAt.toLocaleTimeString()}</span>
-        ) : (
-          <Button
-            size="sm"
-            variant="destructive"
-            className="h-7 px-3"
-            onClick={onStop}
-          >
-            Stop
-          </Button>
-        )}
+        <div className="flex gap-2 items-center">
+          {timer.endedAt ? (
+            <>
+              <span>Ended: {timer.endedAt.toLocaleTimeString()}</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-muted-foreground hover:text-destructive"
+                onClick={onDelete}
+                title="Delete timer"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              variant="destructive"
+              className="h-7 px-3"
+              onClick={onStop}
+            >
+              Stop
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -11,24 +11,25 @@ export class SyncBackendDO extends SyncBackend.makeDurableObject({
   },
 }) {}
 
-const validatePayload = (payload: typeof SyncPayload.Type | undefined, context: { storeId: string }) => {
+const validatePayload = (payload: typeof SyncPayload.Type | undefined, context: { storeId: string }, authToken: string) => {
   console.log(`Validating connection for store: ${context.storeId}`)
-  if (payload?.authToken !== 'insecure-token-change-me') {
+  if (payload?.authToken !== authToken) {
     throw new Error('Invalid auth token')
   }
 }
 
 export default {
-  async fetch(request: CfTypes.Request, _env: SyncBackend.Env, ctx: CfTypes.ExecutionContext) {
+  async fetch(request: CfTypes.Request, env: SyncBackend.Env & { AUTH_TOKEN?: string }, ctx: CfTypes.ExecutionContext) {
     const searchParams = SyncBackend.matchSyncRequest(request)
     if (searchParams !== undefined) {
+      const authToken = env.AUTH_TOKEN || 'insecure-token-change-me'
       return SyncBackend.handleSyncRequest({
         request,
         searchParams,
         ctx,
         syncBackendBinding: 'SYNC_BACKEND_DO',
         syncPayloadSchema: SyncPayload,
-        validatePayload,
+        validatePayload: (payload, context) => validatePayload(payload, context, authToken),
       })
     }
 
